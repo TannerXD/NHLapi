@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="Listener_8081" doc:name="HTTP Listener config" doc:id="f9f3245f-50a1-48ab-8a55-a1a0c4a6f39e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="NHLAPI" doc:name="HTTP Request configuration" doc:id="f786ca01-d69d-451a-94e0-8b092c8a517e" basePath="/api/v1" >
+		<http:request-connection host="statsapi.web.nhl.com" />
+	</http:request-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="fd558a86-5bd0-44a5-9a31-3db980796876" >
+		<file:connection workingDir="C:\Users\Tanner\Desktop\NHLAPI\Roster" />
+	</file:config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="41651ff0-a452-4c47-b6ea-aa2d7fc7a165" config-ref="ObjectStore_Config" persistent="false"/>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="3abde483-d063-4b92-8aa8-25ca8167e3c8" >
+		<os:connection >
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</os:connection>
+	</os:config>
+	<flow name="LookUpPlayer" doc:id="23c00bf8-a646-490e-9763-eb46372bc872" >
+		<http:listener doc:name="player id listener" doc:id="164b64fa-ee75-42c8-90b8-9e1699ba1619" config-ref="Listener_8081" path="player/{playerId}" >
+			<http:response >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"playerId" : attributes.uriParamas.playerId
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<http:request method="GET" doc:name="Copy_of_Request" doc:id="73d3d4a6-d8b3-41e3-851e-01e1184daeb9" config-ref="NHLAPI" path="/people/{playerId}/stats?stats=yearByYear" outputMimeType="application/json" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"playerId" : attributes.uriParams.playerId
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="b7274786-cc08-4cf8-bff4-d4505687b59b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.stats.splits[0] map ( split , indexOfSplit ) -> {
+	
+	"Season": split.season,
+	"League": split.league.name,
+	"Team": split.team.name,
+	"Games Played": split.stat.games,
+	"Games Started": split.stat.gamesStarted,
+	Wins: split.stat.wins,
+	Losses: split.stat.losses,
+	"OT Losses": split.stat.ot,
+	Shutouts: split.stat.shutouts,
+	"Shots Against": split.stat.shotsAgainst,
+	"Goals Against": split.stat.goalsAgainst,
+	Saves: split.stat.saves,
+	"Save Percentage": split.stat.savePercentage
+}
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="d31a37c0-e57a-458a-bb09-f05887929a3d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv headerLineNumber = 1 , header = true , separator = "," , streaming = true
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Season: payload01.Season,
+	League: payload01.League,
+	Team: payload01.Team,
+	"Games Played": payload01."Games Played",
+	"Games Started": payload01."Games Started",
+	Wins: payload01.Wins,
+	Losses: payload01.Losses,
+	"OT Losses": payload01."OT Losses",
+	Shutouts: payload01.Shutouts,
+	"Shots Against": payload01."Shots Against",
+	"Goals Against": payload01."Goals Against",
+	Saves: payload01.Saves,
+	"Save Percentage": payload01."Save Percentage"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="7f746657-42b8-452a-9b8e-7adbfe0c4018" config-ref="File_Config" path="C:\Users\Tanner\Desktop\NHLAPI\Roster\PlayerStatsCSV.csv"/>
+	</flow>
+	<flow name="SaveRosterToFile" doc:id="a30dbe20-2118-4cfc-a267-e736fa51bcfd">
+		<http:listener doc:name="Team Roster Listener" doc:id="cff7bf90-fa23-4a0b-a3b2-da0779b6197b" config-ref="Listener_8081" path="roster/{teamId}">
+			<http:response>
+				<http:headers><![CDATA[#[output application/java
+---
+{
+	"teamId" : attributes.uriParamas.teamId
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<http:request method="GET" doc:name="Request" doc:id="76f3e389-6650-452b-aee7-3bfe67b0ac42" config-ref="NHLAPI" path="/teams/{teamId}?expand=team.roster" outputMimeType="application/json">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"teamId" : attributes.uriParams.teamId
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="91454748-55df-415f-bd49-2f7f2e07e597">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/csv headerLineNumber = 1 , header = false , separator = ",", streaming=true
+---
+payload.teams.roster.roster[0] map ( roster , indexOfRoster ) -> {
+	name: roster.person.fullName,
+	id: roster.person.id,
+	jerseyNumber: roster.jerseyNumber,
+	position: roster.position.code
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="607d22d7-c9cf-4820-8634-9503c8e62891" path="C:\Users\Tanner\Desktop\NHLAPI\Roster\Predators.csv" config-ref="File_Config" />
+		<logger level="INFO" doc:name="Logger" doc:id="59fd5fea-bcf6-42be-909b-d6ac029eea3c" message="#[payload]"/>
+	</flow>
+	<sub-flow name="dsd" doc:id="3aa3bdba-784f-4356-a5f6-ad0313e9e692" >
+		<os:store doc:name="Store" doc:id="18b53abd-d1f5-444d-9ecf-64de2b9de559" objectStore="Object_store" key="#[payload.id]">
+				<os:value><![CDATA[#[%dw 2.0
+output application/java
+---
+[{
+	name: payload.fullName as String,
+	id: payload.id as String,
+	count: vars.counter as String
+}]]]]></os:value>
+			</os:store>
+	</sub-flow>
+</mule>

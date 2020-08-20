@@ -1,0 +1,31 @@
+Season,League,Team,Games Played,Games Started,Wins,Losses,OT Losses,Shutouts,Shots Against,Goals Against,Saves,Save Percentage
+20002001,Fin-Jr.,Karpat Jr.,20,,9,4,,0,,63,,
+20012002,Fin-Jr.,Karpat Jr.,30,,19,7,,3,,61,,
+20022003,Fin-Jr.,Karpat Jr.,25,,14,8,,5,,48,,
+20022003,Finland,Karpat,1,,0,1,,0,,7,,
+20032004,Finland,Karpat,14,,5,4,,0,,41,,
+20032004,Finland-2,Hokki,8,,5,2,,2,,16,,
+20042005,Finland,Karpat,10,,8,0,,0,,16,,
+20052006,National Hockey League,Nashville Predators,2,1,1,1,0,0,40,4,36,0.9
+20052006,AHL,Milwaukee,51,,30,18,,2,1451,139,1312,0.904
+20062007,AHL,Milwaukee,29,,15,7,,3,817,65,752,0.92
+20072008,National Hockey League,Nashville Predators,1,0,0,0,0,0,8,0,8,1
+20072008,AHL,Milwaukee,65,,36,24,,5,1721,158,1563,0.908
+20082009,National Hockey League,Nashville Predators,52,49,29,15,4,7,1435,119,1316,0.917
+20082009,WC-A,Finland,6,,4,2,,1,163,12,151,0.92638
+20092010,National Hockey League,Nashville Predators,58,54,32,16,5,7,1541,137,1404,0.911
+20092010,WC-A,Finland,4,,2,2,,1,98,7,91,0.928571
+20102011,National Hockey League,Nashville Predators,64,64,33,22,9,6,1905,134,1771,0.93
+20112012,National Hockey League,Nashville Predators,73,72,43,18,8,5,2153,166,1987,0.923
+20122013,National Hockey League,Nashville Predators,43,42,15,16,8,5,1101,99,1002,0.91
+20132014,National Hockey League,Nashville Predators,24,24,10,10,3,2,645,63,582,0.902
+20132014,AHL,Milwaukee,2,,2,0,,0,35,2,33,0.943
+20132014,WC-A,Finland,9,,,,,3,237,27,210,0.886076
+20142015,National Hockey League,Nashville Predators,64,64,41,17,6,4,1807,140,1667,0.923
+20142015,WC-A,Finland,7,,,,,3,166,12,154,0.927711
+20152016,National Hockey League,Nashville Predators,66,66,34,21,10,4,1744,161,1583,0.908
+20162017,National Hockey League,Nashville Predators,61,61,31,19,9,3,1757,144,1613,0.918
+20162017,WCup,Finland,1,,,,,,,,,0.907
+20172018,National Hockey League,Nashville Predators,59,59,42,13,4,8,1840,134,1706,0.927
+20182019,National Hockey League,Nashville Predators,56,55,30,19,4,4,1581,130,1451,0.918
+20192020,National Hockey League,Nashville Predators,36,35,18,14,4,3,1004,105,899,0.895
